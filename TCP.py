@@ -9,11 +9,13 @@ class TCP:
     states = ["CLOSED", "LISTEN", "SYN-RECEIVED", "SYN-SENT", "ESTABLISHED"]
     current_state = states[0]
 
-    sock = None
+    sock_listen = None
+    sock_send = None
     client = None
 
     # TCB
     source_port = None
+    dest_port = None
     client_address = None
 
     def log(self, text):
@@ -42,28 +44,39 @@ class TCP:
         self.change_gui_state(state)
 
     # UTIL
-    def setup_send_socket(self, destination_port):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.connect(("localhost", destination_port))
+    def setup_send_socket(self):
+        self.sock_send = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print self.dest_port
+        self.sock_send.connect(("localhost", self.dest_port))
 
     def send_syn(self):  # TODO
-        self.sock.send("SYN")
+        self.sock_send.send("SYN "+ str(self.source_port))
 
-    def receive_syn(self):  # TODO
-        self.sock.listen(5)
-        self.client, self.client_address = self.sock.accept()
+    def handle_msg(self, msg):
+        print msg
+        tokens = msg.split(" ")
+        if tokens[0] == "SYN":
+            self.dest_port = int(tokens[1])
+            self.setup_send_socket()
+
+            self.change_state(self.states[2])
+
+        elif tokens[0] == "SYN_ACK":
+            self.sock_send.send("ACK")
+            self.change_state(self.states[4])
+
+        elif tokens[0] == "ACK":
+            self.change_state(self.states[4])
+
+    def start_listening(self):
+        print "start listening start"
+        self.sock_listen.listen(5)
+        self.client, self.client_address = self.sock_listen.accept()
         print "connection", self.client_address
 
-        msg = self.client.recv(255)
-        print msg
-        if msg == "SYN":
-            self.send_syn_ack()
-            return True
-        return False
-
-    def send_syn_ack(self):
-        self.client.send("SYN_ACK")  # TODO notsure good address
-        pass
+        while self.current_state != self.states[0]: #while not closed
+            msg = self.client.recv(255)# might need to change the size
+            self.handle_msg(msg)
 
     # CLOSED STATE
     def closed_open(self, source_port):
@@ -75,43 +88,51 @@ class TCP:
         if 0 < source_port < 65535:
             self.source_port = source_port
 
-            # setup socket
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.bind(("", source_port))
+            # setup listen socket
+            self.sock_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock_listen.bind(("", source_port))
+            threading.Thread(target=self.start_listening).start()
 
-            # get client
-            self.change_state(self.states[1])
-
-            def is_syn_received():
-                if self.receive_syn():
-                    self.change_state(self.states[2])
-            threading.Thread(target=is_syn_received).start()  # TODO while !syn_received ?
-
+            self.change_state(self.states[1])  # LISTEN
         else:
             print "[TCP] Error : closed_open"
 
-    def closed_send(self, destination_port):
+    def closed_send(self, destination_port, source_port):
         if self.current_state != self.states[0]:
             print "[TCP] Error : closed_open"
             return
 
-        if 0 < destination_port < 65535:
-            self.setup_send_socket(destination_port)
+        if 0 < destination_port < 65535 and 0 < source_port < 65535:
+            self.source_port = source_port
+            self.dest_port = destination_port
+
+            # setup listen socket
+            self.sock_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock_listen.bind(("", source_port))
+            threading.Thread(target=self.start_listening).start()
+
+            # setup send socket
+            self.setup_send_socket()
+
             self.send_syn()
             self.change_state(self.states[3])
         else:
             print "[TCP] Error : closed_send"
 
     # LISTEN STATE
-    def listen_send_syn(self, destination_port):
+    def listen_send_syn(self, destination_port):  # TODO bullshit
         if self.current_state != self.states[1]:
             print "[TCP] Error : closed_open"
             return
 
         if 0 < destination_port < 65535:
-            self.sock.close()  # clean stop listen
+            self.sock_listen.close()  # clean stop listen
             self.setup_send_socket(destination_port)
             self.send_syn()
             self.change_state(self.states[3])
         else:
             print "[TCP] Error : listen_send_syn"
+
+    # SYN-RECEIVED STATE
+    def syn_received_send_syn_ack(self):
+        self.sock_send.send("SYN_ACK")

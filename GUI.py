@@ -78,12 +78,17 @@ class ClosedFrame(Frame):
 
         labelframe2 = LabelFrame(self, text="Active OPEN")
         labelframe2.pack()
+        labal4 = Label(labelframe2, text="source port : ")
+        labal4.pack()
+        spinbox3 = Spinbox(labelframe2, from_=0, to_=9999)
+        spinbox3.pack()
         labal3 = Label(labelframe2, text="destination port : ")
         labal3.pack()
         spinbox2 = Spinbox(labelframe2, from_=0, to_=9999)
         spinbox2.pack()
+
         button2 = Button(labelframe2, text="Send",
-                           command=lambda: controller.tcp.closed_send(int(spinbox2.get())))
+                           command=lambda: controller.tcp.closed_send(int(spinbox2.get()), int(spinbox3.get())))
         button2.pack()
 
 
@@ -117,14 +122,14 @@ class SYNSentFrame(Frame):
         self.controller = controller
         label = Label(self, text="State : SYN-Sent", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
-        button = Button(self, text="Receive SYN+ACK, Send ACK",
+        '''button = Button(self, text="Receive SYN+ACK, Send ACK",
                            command=lambda: controller.show_frame("EstablishedFrame"))
         button.pack()
         labelframe = LabelFrame(self, text="Simultaneous Open")
         labelframe.pack()
         button2 = Button(labelframe, text="Receive SYN, Send ACK",
                            command=lambda: controller.show_frame("SYNReceivedFrame"))
-        button2.pack()
+        button2.pack()'''
 
 
 class SYNReceivedFrame(Frame):
@@ -134,8 +139,8 @@ class SYNReceivedFrame(Frame):
         self.controller = controller
         label = Label(self, text="State : SYN-Received", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
-        button = Button(self, text="Receive ACK",
-                           command=lambda: controller.show_frame("EstablishedFrame"))
+        button = Button(self, text="Send SYN + ACK",
+                           command=lambda: controller.tcp.syn_received_send_syn_ack())
         button.pack()
 
 
