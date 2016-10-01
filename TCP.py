@@ -49,24 +49,35 @@ class TCP:
         print self.dest_port
         self.sock_send.connect(("localhost", self.dest_port))
 
+#CONNEXION DIALOG FERMETURE
     def send_syn(self):  # TODO
-        self.sock_send.send("SYN "+ str(self.source_port))
+        self.sock_send.send("CONNEXION_SYN "+ str(self.source_port))
 
     def handle_msg(self, msg):
         print msg
         tokens = msg.split(" ")
-        if tokens[0] == "SYN":
+        if tokens[0] == "CONNEXION_SYN":
             self.dest_port = int(tokens[1])
             self.setup_send_socket()
 
             self.change_state(self.states[2])
 
-        elif tokens[0] == "SYN_ACK":
-            self.sock_send.send("ACK")
+        elif tokens[0] == "CONNEXION_SYN_ACK":
+            self.sock_send.send("CONNEXION_ACK")
             self.change_state(self.states[4])
 
-        elif tokens[0] == "ACK":
+        elif tokens[0] == "CONNEXION_ACK":
             self.change_state(self.states[4])
+
+        elif tokens[0] == "ESTABLISHED_SEND":
+            #RCV.NXT incr
+            print "RECEIVED :", tokens[1]
+            self.sock_send.send("ESTABLISHED_ACK")
+
+        elif tokens[0] == "ESTABLISHED_ACK":
+            #SND.UNA incr
+            print "RECEIVED ACK"
+
 
     def start_listening(self):
         print "start listening start"
@@ -135,4 +146,10 @@ class TCP:
 
     # SYN-RECEIVED STATE
     def syn_received_send_syn_ack(self):
-        self.sock_send.send("SYN_ACK")
+        self.sock_send.send("CONNEXION_SYN_ACK")
+
+    # ESTABLISHED STATE
+    def send_data(self, data):
+        #SND.NXT incr
+        print "SEND :", data
+        self.sock_send.send("ESTABLISHED_SEND " + str(data))

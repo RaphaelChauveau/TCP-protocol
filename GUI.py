@@ -151,6 +151,18 @@ class EstablishedFrame(Frame):
         self.controller = controller
         label = Label(self, text="State : Established", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
+
+        labelframe = LabelFrame(self, text="Send data")
+        labelframe.pack()
+        entry = Entry(labelframe)
+        entry.pack()
+
+        def send_button_clicked():
+            controller.tcp.send_data(entry.get())
+            entry.delete(0,END)
+        button = Button(labelframe, text="Send", command=send_button_clicked)
+        button.pack()
+
         button = Button(self, text="Close, Send FIN",
                            command=lambda: controller.show_frame("ListenFrame"))
         button.pack()
