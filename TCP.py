@@ -15,7 +15,10 @@ class TCP:
 
     # TCB
     source_port = None
+    source_ip = socket.gethostbyname(socket.gethostname())
+    print "source_ip", source_ip
     dest_port = None
+    dest_ip = None
     client_address = None
 
     def log(self, text):
@@ -47,17 +50,18 @@ class TCP:
     def setup_send_socket(self):
         self.sock_send = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print self.dest_port
-        self.sock_send.connect(("localhost", self.dest_port))
+        self.sock_send.connect((self.dest_ip, self.dest_port))
 
-#CONNEXION DIALOG FERMETURE
+# CONNEXION DIALOG FERMETURE
     def send_syn(self):  # TODO
-        self.sock_send.send("CONNEXION_SYN "+ str(self.source_port))
+        self.sock_send.send("CONNEXION_SYN " + str(self.source_port) + " " + self.source_ip)
 
     def handle_msg(self, msg):
         print msg
         tokens = msg.split(" ")
         if tokens[0] == "CONNEXION_SYN":
             self.dest_port = int(tokens[1])
+            self.dest_ip = tokens[2]
             self.setup_send_socket()
 
             self.change_state(self.states[2])
@@ -77,7 +81,6 @@ class TCP:
         elif tokens[0] == "ESTABLISHED_ACK":
             #SND.UNA incr
             print "RECEIVED ACK"
-
 
     def start_listening(self):
         print "start listening start"
@@ -108,12 +111,13 @@ class TCP:
         else:
             print "[TCP] Error : closed_open"
 
-    def closed_send(self, destination_port, source_port):
+    def closed_send(self, destination_port, source_port, dest_ip):
         if self.current_state != self.states[0]:
             print "[TCP] Error : closed_open"
             return
 
         if 0 < destination_port < 65535 and 0 < source_port < 65535:
+            self.dest_ip = dest_ip
             self.source_port = source_port
             self.dest_port = destination_port
 

@@ -78,17 +78,24 @@ class ClosedFrame(Frame):
 
         labelframe2 = LabelFrame(self, text="Active OPEN")
         labelframe2.pack()
+
         labal4 = Label(labelframe2, text="source port : ")
         labal4.pack()
         spinbox3 = Spinbox(labelframe2, from_=0, to_=9999)
         spinbox3.pack()
+
+        labal5 = Label(labelframe2, text="destination ip address : ")
+        labal5.pack()
+        entry = Entry(labelframe2)
+        entry.pack()
+
         labal3 = Label(labelframe2, text="destination port : ")
         labal3.pack()
         spinbox2 = Spinbox(labelframe2, from_=0, to_=9999)
         spinbox2.pack()
 
         button2 = Button(labelframe2, text="Send",
-                           command=lambda: controller.tcp.closed_send(int(spinbox2.get()), int(spinbox3.get())))
+                           command=lambda: controller.tcp.closed_send(int(spinbox2.get()), int(spinbox3.get()), entry.get()))
         button2.pack()
 
 
