@@ -1,10 +1,18 @@
 import GUI
 import TCP
-
+from tkinter import messagebox
 if __name__ == "__main__":
     gui = GUI.App()
     tcp = TCP.TCP(gui)
     gui.set_tcp(tcp)
+
+
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Are you sure you want to terminate the connection?"):
+            gui.destroy()
+
+
+    gui.protocol("WM_DELETE_WINDOW", on_closing)
 
     gui.bind("<<CLOSED>>", gui.change_state_closed)
     gui.bind("<<LISTEN>>", gui.change_state_listen)
