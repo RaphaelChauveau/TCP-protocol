@@ -200,7 +200,7 @@ class EstablishedFrame(Frame):
         vertbar.config(command=self.listbox.yview)
 
     def showmessage(self, message):
-        self.listbox.insert(END, message)
+        self.listbox.insert(END, "> " + message)
 
     def showacknowledge(self):
         self.listbox.insert(END, "# Received ACK")
@@ -240,6 +240,19 @@ class TimeWaitFrame(Frame):
         self.controller = controller
         label = Label(self, text="State : Time-Wait", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
+
+        import os
+        import time
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        imgpath = dir_path + os.path.sep + "ressources" + os.path.sep + "hourglass.gif"
+        if os.path.isfile(imgpath) :
+            image = PhotoImage(file=imgpath)
+            imagelabel = Label(self, image=image)
+            imagelabel.image = image
+            imagelabel.pack()
+        else :
+            print "\"" + imgpath + "\" is not a file."
+
 
 
 class CloseWaitFrame(Frame):
