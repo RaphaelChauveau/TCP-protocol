@@ -206,7 +206,8 @@ class EstablishedFrame(Frame):
         #label2 = Label(self, text=message, font=TITLE_FONT)
         #label2.pack()
 
-
+    def showacknowledge(self):
+        self.listbox.insert(END, "# Received ACK")
 
 class FinWait1Frame(Frame):
     def __init__(self, parent, controller):

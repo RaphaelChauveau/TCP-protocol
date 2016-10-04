@@ -100,6 +100,7 @@ class TCP:
         elif tokens[0] == "ESTABLISHED_ACK":
             #SND.UNA incr
             print "RECEIVED ACK"
+            self.gui.frames["EstablishedFrame"].showacknowledge()
 
         elif tokens[0] == "CLOSING_FIN1":
             self.change_state(self.states[8])
@@ -142,8 +143,8 @@ class TCP:
                 self.change_state(self.states[1])  # LISTEN
             except socket.error as e:
                 if e.errno == 10048:
-                    print("Port " + str(source_port) + " is already taken.")
-                    messagebox.showwarning("TCP-Protocol", "Port " + str(source_port) + " is already taken.")
+                    print("Port " + str(source_port) + " is already in use.")
+                    messagebox.showwarning("TCP-Protocol", "Port " + str(source_port) + " is already in use.")
                 else:
                     # something else raised the socket.error exception
                     print(e)
