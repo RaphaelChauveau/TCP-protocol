@@ -1,6 +1,7 @@
 import socket
 import threading
 
+from tkinter import messagebox
 import time
 
 
@@ -104,9 +105,9 @@ class TCP:
 
         elif tokens[0] == "ESTABLISHED_SEND":
             #RCV.NXT incr
-            texto = ""
-            for word in tokens[1:]:
-                texto += word + " "
+            texto = msg[17:]
+            #for word in tokens[1:]:
+            #    texto += word + " "
 
             print "RECEIVED :", tokens[1]
             self.gui.frames["EstablishedFrame"].showmessage(texto)
@@ -115,6 +116,7 @@ class TCP:
         elif tokens[0] == "ESTABLISHED_ACK":
             #SND.UNA incr
             print "RECEIVED ACK"
+            self.gui.frames["EstablishedFrame"].showacknowledge()
 
         elif tokens[0] == "CLOSING_FIN1":
             self.change_state(self.states[8])
@@ -151,10 +153,17 @@ class TCP:
 
             # setup listen socket
             self.sock_listen = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock_listen.bind(("", source_port))
-            threading.Thread(target=self.start_listening).start()
-
-            self.change_state(self.states[1])  # LISTEN
+            try:
+                self.sock_listen.bind(("", source_port))
+                threading.Thread(target=self.start_listening).start()
+                self.change_state(self.states[1])  # LISTEN
+            except socket.error as e:
+                if e.errno == 10048:
+                    print("Port " + str(source_port) + " is already in use.")
+                    messagebox.showwarning("TCP-Protocol", "Port " + str(source_port) + " is already in use.")
+                else:
+                    # something else raised the socket.error exception
+                    print(e)
         else:
             print "[TCP] Error : closed_open"
 
