@@ -3,6 +3,7 @@ import TCP
 from tkinter import messagebox
 if __name__ == "__main__":
     gui = GUI.App()
+    gui.wm_title("TCP")
     tcp = TCP.TCP(gui)
     gui.set_tcp(tcp)
 

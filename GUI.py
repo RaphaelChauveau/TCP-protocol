@@ -145,10 +145,6 @@ class ListenFrame(Frame):
                         command=lambda: controller.tcp.listen_send_syn(int(spinbox.get())))
         button.pack()
 
-        button2 = Button(self, text="Receive SYN",
-                         command=lambda: controller.show_frame("SYNReceivedFrame"))
-        button2.pack()
-
 
 class SYNSentFrame(Frame):
     def __init__(self, parent, controller):
