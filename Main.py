@@ -11,5 +11,10 @@ if __name__ == "__main__":
     gui.bind("<<SYN-RECEIVED>>", gui.change_state_syn_received)
     gui.bind("<<SYN-SENT>>", gui.change_state_syn_sent)
     gui.bind("<<ESTABLISHED>>", gui.change_state_established)
+    gui.bind("<<FIN-WAIT-1>>", gui.change_state_fin_wait_1)
+    gui.bind("<<FIN-WAIT-2>>", gui.change_state_fin_wait_2)
+    gui.bind("<<TIME-WAIT>>", gui.change_state_time_wait)
+    gui.bind("<<CLOSE-WAIT>>", gui.change_state_close_wait)
+    gui.bind("<<LAST-ACK>>", gui.change_state_last_ack)
 
     gui.mainloop()
