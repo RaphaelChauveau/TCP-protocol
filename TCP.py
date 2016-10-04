@@ -71,17 +71,6 @@ class TCP:
         self.sock_listen.close()
         self.gui.delete_button_last_ack()
         self.gui.frames["EstablishedFrame"].clean_buffer()
-        '''self.sock_listen = None
-        self.sock_send = None
-        self.client = None
-
-        # TCB
-        self.source_port = None
-        source_ip = socket.gethostbyname(socket.gethostname())
-        print "source_ip", source_ip
-        self.dest_port = None
-        self.dest_ip = None
-        self.client_address = None'''
 
 # CONNEXION DIALOG CLOSING
     def send_syn(self):  # TODO
@@ -107,8 +96,6 @@ class TCP:
         elif tokens[0] == "ESTABLISHED_SEND":
             #RCV.NXT incr
             texto = msg[17:]
-            #for word in tokens[1:]:
-            #    texto += word + " "
 
             print "RECEIVED :", tokens[1]
             self.gui.frames["EstablishedFrame"].showmessage(texto)
@@ -139,7 +126,7 @@ class TCP:
         print "connection", self.client_address
 
         while self.current_state != self.states[0]: #while not closed
-            msg = self.client.recv(255)# might need to change the size
+            msg = self.client.recv(2048)# might need to change the size
             self.handle_msg(msg)
 
     # CLOSED STATE
