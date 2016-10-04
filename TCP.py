@@ -70,6 +70,7 @@ class TCP:
         self.sock_send.close()
         self.sock_listen.close()
         self.gui.delete_button_last_ack()
+        self.gui.frames["EstablishedFrame"].clean_buffer()
         '''self.sock_listen = None
         self.sock_send = None
         self.client = None

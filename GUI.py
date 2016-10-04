@@ -192,22 +192,21 @@ class EstablishedFrame(Frame):
 
         vertbar = Scrollbar(self)
         vertbar.pack(side=RIGHT, fill=Y)
-        horibar = Scrollbar(self, orient=HORIZONTAL)
-        horibar.pack(side=BOTTOM, fill=X)
 
         self.listbox = Listbox(self)
         self.listbox.pack(fill=X)
 
-        self.listbox.config(yscrollcommand=vertbar.set,
-                            xscrollcommand=horibar.set)
+        self.listbox.config(yscrollcommand=vertbar.set)
         vertbar.config(command=self.listbox.yview)
-        horibar.config(command=self.listbox.xview)
 
     def showmessage(self, message):
         self.listbox.insert(END, message)
 
     def showacknowledge(self):
         self.listbox.insert(END, "# Received ACK")
+
+    def clean_buffer(self):
+        self.listbox.delete(0, END)
 
 
 class FinWait1Frame(Frame):
