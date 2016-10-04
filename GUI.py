@@ -1,16 +1,17 @@
 from tkinter import *
+import socket
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 
 
 class App(Tk):
-
     tcp = None
+    source_ip = socket.gethostbyname(socket.gethostname())
 
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
 
-        label = Label(self, text="TCP OP")
+        label = Label(self, text="Local IP : "+self.source_ip)
         label.pack()
 
         # the container is where we'll stack a bunch of frames
@@ -78,7 +79,6 @@ class App(Tk):
 
 
 class ClosedFrame(Frame):
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
@@ -94,7 +94,7 @@ class ClosedFrame(Frame):
         spinbox.insert(0, 4242)
         spinbox.pack()
         button = Button(labelframe, text="Open",
-                           command=lambda: controller.tcp.closed_open(int(spinbox.get())))
+                        command=lambda: controller.tcp.closed_open(int(spinbox.get())))
         button.pack()
 
         labelframe2 = LabelFrame(self, text="Active OPEN")
@@ -120,12 +120,12 @@ class ClosedFrame(Frame):
         spinbox2.pack()
 
         button2 = Button(labelframe2, text="Send",
-                           command=lambda: controller.tcp.closed_send(int(spinbox2.get()), int(spinbox3.get()), entry.get()))
+                         command=lambda: controller.tcp.closed_send(int(spinbox2.get()), int(spinbox3.get()),
+                                                                    entry.get()))
         button2.pack()
 
 
 class ListenFrame(Frame):
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
@@ -139,16 +139,15 @@ class ListenFrame(Frame):
         spinbox = Spinbox(labelframe, from_=0, to_=9999)
         spinbox.pack()
         button = Button(labelframe, text="Send SYN",
-                           command=lambda: controller.tcp.listen_send_syn(int(spinbox.get())))
+                        command=lambda: controller.tcp.listen_send_syn(int(spinbox.get())))
         button.pack()
 
         button2 = Button(self, text="Receive SYN",
-                           command=lambda: controller.show_frame("SYNReceivedFrame"))
+                         command=lambda: controller.show_frame("SYNReceivedFrame"))
         button2.pack()
 
 
 class SYNSentFrame(Frame):
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
@@ -157,22 +156,23 @@ class SYNSentFrame(Frame):
 
 
 class SYNReceivedFrame(Frame):
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
         label = Label(self, text="State : SYN-Received", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
         button = Button(self, text="Send SYN + ACK",
-                           command=lambda: controller.tcp.syn_received_send_syn_ack())
+                        command=lambda: controller.tcp.syn_received_send_syn_ack())
         button.pack()
 
 
 class EstablishedFrame(Frame):
 
+
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
+        self.listbox = None
         label = Label(self, text="State : Established", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
 
@@ -183,13 +183,29 @@ class EstablishedFrame(Frame):
 
         def send_button_clicked():
             controller.tcp.established_send_data(entry.get())
-            entry.delete(0,END)
+            entry.delete(0, END)
+
         button = Button(labelframe, text="Send", command=send_button_clicked)
         button.pack()
 
         button = Button(self, text="Close, Send FIN",
-                           command=lambda: controller.tcp.established_close())
+                        command=lambda: controller.tcp.established_close())
         button.pack()
+
+        bar = Scrollbar(self)
+        bar.pack(side=RIGHT, fill=Y)
+
+        self.listbox = Listbox(self)
+        self.listbox.pack()
+
+        self.listbox.config(yscrollcommand=bar.set)
+        bar.config(command=self.listbox.yview)
+
+    def showmessage(self, message):
+        self.listbox.insert(END, message)
+        #label2 = Label(self, text=message, font=TITLE_FONT)
+        #label2.pack()
+
 
 
 class FinWait1Frame(Frame):
@@ -235,7 +251,7 @@ class CloseWaitFrame(Frame):
             button.config(text="Send Fin", command=lambda: send_fin())
 
         button = Button(self, text="Send ACK",
-                           command=lambda: send_ack(button))
+                        command=lambda: send_ack(button))
         button.pack()
 
 

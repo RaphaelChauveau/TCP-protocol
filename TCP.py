@@ -88,7 +88,12 @@ class TCP:
 
         elif tokens[0] == "ESTABLISHED_SEND":
             #RCV.NXT incr
+            texto = ""
+            for word in tokens[1:]:
+                texto += word + " "
+
             print "RECEIVED :", tokens[1]
+            self.gui.frames["EstablishedFrame"].showmessage(texto)
             self.sock_send.send("ESTABLISHED_ACK")
 
         elif tokens[0] == "ESTABLISHED_ACK":
