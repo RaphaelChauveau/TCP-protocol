@@ -73,6 +73,9 @@ class App(Tk):
     def change_state_last_ack(self, *args):
         self.show_frame("LastAckFrame")
 
+    def create_button_last_ack(self):
+        self.frames["FinWait2Frame"].create_button_last_ack()
+
 
 class ClosedFrame(Frame):
 
@@ -203,6 +206,10 @@ class FinWait2Frame(Frame):
         self.controller = controller
         label = Label(self, text="State : Fin-Wait-2", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
+
+    def create_button_last_ack(self):
+        button = Button(self, text="Send ACK", command=lambda: self.controller.tcp.fin_wait2_send_ack())
+        button.pack()
 
 
 class TimeWaitFrame(Frame):
