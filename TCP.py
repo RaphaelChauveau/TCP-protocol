@@ -65,6 +65,22 @@ class TCP:
         print self.dest_port
         self.sock_send.connect((self.dest_ip, self.dest_port))
 
+    def clean_everything(self):
+        self.sock_send.close()
+        self.sock_listen.close()
+        self.gui.delete_button_last_ack()
+        '''self.sock_listen = None
+        self.sock_send = None
+        self.client = None
+
+        # TCB
+        self.source_port = None
+        source_ip = socket.gethostbyname(socket.gethostname())
+        print "source_ip", source_ip
+        self.dest_port = None
+        self.dest_ip = None
+        self.client_address = None'''
+
 # CONNEXION DIALOG CLOSING
     def send_syn(self):  # TODO
         self.sock_send.send("CONNEXION_SYN " + str(self.source_port) + " " + self.source_ip)
@@ -110,7 +126,7 @@ class TCP:
             self.gui.create_button_last_ack()
 
         elif tokens[0] == "CLOSING_ACK2":
-            #TODO CLEAN ALLLLL
+            self.clean_everything()
             self.change_state(self.states[0])
 
     def start_listening(self):
@@ -213,7 +229,7 @@ class TCP:
     # TIME-WAIT
     def time_wait_timeout(self):
         time.sleep(5)
-        #TODO CLEAN EVERYTHING
+        self.clean_everything()
         self.change_state(self.states[0])
 
     def time_wait_start_timeout(self):

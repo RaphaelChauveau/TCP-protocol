@@ -77,6 +77,9 @@ class App(Tk):
     def create_button_last_ack(self):
         self.frames["FinWait2Frame"].create_button_last_ack()
 
+    def delete_button_last_ack(self):
+        self.frames["FinWait2Frame"].delete_button_last_ack()
+
 
 class ClosedFrame(Frame):
     def __init__(self, parent, controller):
@@ -168,7 +171,6 @@ class SYNReceivedFrame(Frame):
 
 class EstablishedFrame(Frame):
 
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
@@ -207,7 +209,6 @@ class EstablishedFrame(Frame):
         #label2.pack()
 
 
-
 class FinWait1Frame(Frame):
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
@@ -223,9 +224,14 @@ class FinWait2Frame(Frame):
         label = Label(self, text="State : Fin-Wait-2", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
 
+        self.button = Button(self, text="Send ACK", command=lambda: self.controller.tcp.fin_wait2_send_ack(), state="disabled")
+        self.button.pack()
+
     def create_button_last_ack(self):
-        button = Button(self, text="Send ACK", command=lambda: self.controller.tcp.fin_wait2_send_ack())
-        button.pack()
+        self.button.config(state="normal")
+
+    def delete_button_last_ack(self):
+        self.button.config(state="disabled")
 
 
 class TimeWaitFrame(Frame):
@@ -243,12 +249,13 @@ class CloseWaitFrame(Frame):
         label = Label(self, text="State : Close-Wait", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
 
-        def send_fin():
+        def send_fin(button):
             controller.tcp.close_wait_send_fin()
+            button.config(text="Send ACK", command=lambda: send_ack(button))
 
         def send_ack(button):
             controller.tcp.close_wait_send_ack()
-            button.config(text="Send Fin", command=lambda: send_fin())
+            button.config(text="Send Fin", command=lambda: send_fin(button))
 
         button = Button(self, text="Send ACK",
                         command=lambda: send_ack(button))
