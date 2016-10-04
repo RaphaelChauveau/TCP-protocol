@@ -192,12 +192,16 @@ class EstablishedFrame(Frame):
 
         vertbar = Scrollbar(self)
         vertbar.pack(side=RIGHT, fill=Y)
+        horibar = Scrollbar(self, orient=HORIZONTAL)
+        horibar.pack(side=BOTTOM, fill=X)
 
         self.listbox = Listbox(self)
         self.listbox.pack(fill=X)
 
-        self.listbox.config(yscrollcommand=vertbar.set)
+        self.listbox.config(yscrollcommand=vertbar.set,
+                            xscrollcommand=horibar.set)
         vertbar.config(command=self.listbox.yview)
+        horibar.config(command=self.listbox.xview)
 
     def showmessage(self, message):
         self.listbox.insert(END, message)
