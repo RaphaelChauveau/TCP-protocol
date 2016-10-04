@@ -1,6 +1,9 @@
 import socket
 import threading
+
 from tkinter import messagebox
+import time
+
 
 class TCP:
 
@@ -105,9 +108,11 @@ class TCP:
             self.change_state(self.states[6])
 
         elif tokens[0] == "CLOSING_FIN2":
-            pass
-            #todo send ack (fin-wait-2 . add button ack)
-            #time wait
+            self.gui.create_button_last_ack()
+
+        elif tokens[0] == "CLOSING_ACK2":
+            #TODO CLEAN ALLLLL
+            self.change_state(self.states[0])
 
     def start_listening(self):
         print "start listening start"
@@ -206,3 +211,18 @@ class TCP:
     def close_wait_send_fin(self):
         self.sock_send.send("CLOSING_FIN2")
         self.change_state(self.states[9])
+
+    # FIN-WAIT2
+    def fin_wait2_send_ack(self):
+        self.sock_send.send("CLOSING_ACK2")
+        self.change_state(self.states[7])
+        self.time_wait_start_timeout()
+
+    # TIME-WAIT
+    def time_wait_timeout(self):
+        time.sleep(5)
+        #TODO CLEAN EVERYTHING
+        self.change_state(self.states[0])
+
+    def time_wait_start_timeout(self):
+        threading.Thread(target=self.time_wait_timeout).start()
