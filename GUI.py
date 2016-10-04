@@ -22,7 +22,8 @@ class App(Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (ClosedFrame, ListenFrame, SYNReceivedFrame, SYNSentFrame, EstablishedFrame):
+        for F in (ClosedFrame, ListenFrame, SYNReceivedFrame, SYNSentFrame, EstablishedFrame, FinWait1Frame,
+                  FinWait2Frame, TimeWaitFrame, CloseWaitFrame, LastAckFrame):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -57,6 +58,21 @@ class App(Tk):
     def change_state_established(self, *args):
         self.show_frame("EstablishedFrame")
 
+    def change_state_fin_wait_1(self, *args):
+        self.show_frame("FinWait1Frame")
+
+    def change_state_fin_wait_2(self, *args):
+        self.show_frame("FinWait2Frame")
+
+    def change_state_time_wait(self, *args):
+        self.show_frame("TimeWaitFrame")
+
+    def change_state_close_wait(self, *args):
+        self.show_frame("CloseWaitFrame")
+
+    def change_state_last_ack(self, *args):
+        self.show_frame("LastAckFrame")
+
 
 class ClosedFrame(Frame):
 
@@ -71,6 +87,8 @@ class ClosedFrame(Frame):
         labal2 = Label(labelframe, text="source port : ")
         labal2.pack()
         spinbox = Spinbox(labelframe, from_=0, to_=9999)
+        spinbox.delete(0, "end")
+        spinbox.insert(0, 4242)
         spinbox.pack()
         button = Button(labelframe, text="Open",
                            command=lambda: controller.tcp.closed_open(int(spinbox.get())))
@@ -82,6 +100,8 @@ class ClosedFrame(Frame):
         labal4 = Label(labelframe2, text="source port : ")
         labal4.pack()
         spinbox3 = Spinbox(labelframe2, from_=0, to_=9999)
+        spinbox3.delete(0, "end")
+        spinbox3.insert(0, 4343)
         spinbox3.pack()
 
         labal5 = Label(labelframe2, text="destination ip address : ")
@@ -92,6 +112,8 @@ class ClosedFrame(Frame):
         labal3 = Label(labelframe2, text="destination port : ")
         labal3.pack()
         spinbox2 = Spinbox(labelframe2, from_=0, to_=9999)
+        spinbox2.delete(0, "end")
+        spinbox2.insert(0, 4242)
         spinbox2.pack()
 
         button2 = Button(labelframe2, text="Send",
@@ -129,14 +151,6 @@ class SYNSentFrame(Frame):
         self.controller = controller
         label = Label(self, text="State : SYN-Sent", font=TITLE_FONT)
         label.pack(side="top", fill="x", pady=10)
-        '''button = Button(self, text="Receive SYN+ACK, Send ACK",
-                           command=lambda: controller.show_frame("EstablishedFrame"))
-        button.pack()
-        labelframe = LabelFrame(self, text="Simultaneous Open")
-        labelframe.pack()
-        button2 = Button(labelframe, text="Receive SYN, Send ACK",
-                           command=lambda: controller.show_frame("SYNReceivedFrame"))
-        button2.pack()'''
 
 
 class SYNReceivedFrame(Frame):
@@ -165,14 +179,65 @@ class EstablishedFrame(Frame):
         entry.pack()
 
         def send_button_clicked():
-            controller.tcp.send_data(entry.get())
+            controller.tcp.established_send_data(entry.get())
             entry.delete(0,END)
         button = Button(labelframe, text="Send", command=send_button_clicked)
         button.pack()
 
         button = Button(self, text="Close, Send FIN",
-                           command=lambda: controller.show_frame("ListenFrame"))
+                           command=lambda: controller.tcp.established_close())
         button.pack()
+
+
+class FinWait1Frame(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+        label = Label(self, text="State : Fin-Wait-1", font=TITLE_FONT)
+        label.pack(side="top", fill="x", pady=10)
+
+
+class FinWait2Frame(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+        label = Label(self, text="State : Fin-Wait-2", font=TITLE_FONT)
+        label.pack(side="top", fill="x", pady=10)
+
+
+class TimeWaitFrame(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+        label = Label(self, text="State : Time-Wait", font=TITLE_FONT)
+        label.pack(side="top", fill="x", pady=10)
+
+
+class CloseWaitFrame(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+        label = Label(self, text="State : Close-Wait", font=TITLE_FONT)
+        label.pack(side="top", fill="x", pady=10)
+
+        def send_fin():
+            controller.tcp.close_wait_send_fin()
+
+        def send_ack(button):
+            controller.tcp.close_wait_send_ack()
+            button.config(text="Send Fin", command=lambda: send_fin())
+
+        button = Button(self, text="Send ACK",
+                           command=lambda: send_ack(button))
+        button.pack()
+
+
+class LastAckFrame(Frame):
+    def __init__(self, parent, controller):
+        Frame.__init__(self, parent)
+        self.controller = controller
+        label = Label(self, text="State : Last-Ack", font=TITLE_FONT)
+        label.pack(side="top", fill="x", pady=10)
 
 
 def startapp():

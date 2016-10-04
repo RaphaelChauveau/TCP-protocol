@@ -6,7 +6,8 @@ class TCP:
 
     # var
     gui = None
-    states = ["CLOSED", "LISTEN", "SYN-RECEIVED", "SYN-SENT", "ESTABLISHED"]
+    states = ["CLOSED", "LISTEN", "SYN-RECEIVED", "SYN-SENT", "ESTABLISHED", "FIN-WAIT-1",
+              "FIN-WAIT-2", "TIME-WAIT", "CLOSE-WAIT", "LAST-ACK"]
     current_state = states[0]
 
     sock_listen = None
@@ -38,6 +39,16 @@ class TCP:
             self.gui.event_generate("<<" + self.states[3] + ">>", when="tail")
         elif state == self.states[4]:
             self.gui.event_generate("<<" + self.states[4] + ">>", when="tail")
+        elif state == self.states[5]:
+            self.gui.event_generate("<<" + self.states[5] + ">>", when="tail")
+        elif state == self.states[6]:
+            self.gui.event_generate("<<" + self.states[6] + ">>", when="tail")
+        elif state == self.states[7]:
+            self.gui.event_generate("<<" + self.states[7] + ">>", when="tail")
+        elif state == self.states[8]:
+            self.gui.event_generate("<<" + self.states[8] + ">>", when="tail")
+        elif state == self.states[9]:
+            self.gui.event_generate("<<" + self.states[9] + ">>", when="tail")
         else:
             print "Error TCP : change_gui_state"
 
@@ -52,7 +63,7 @@ class TCP:
         print self.dest_port
         self.sock_send.connect((self.dest_ip, self.dest_port))
 
-# CONNEXION DIALOG FERMETURE
+# CONNEXION DIALOG CLOSING
     def send_syn(self):  # TODO
         self.sock_send.send("CONNEXION_SYN " + str(self.source_port) + " " + self.source_ip)
 
@@ -81,6 +92,17 @@ class TCP:
         elif tokens[0] == "ESTABLISHED_ACK":
             #SND.UNA incr
             print "RECEIVED ACK"
+
+        elif tokens[0] == "CLOSING_FIN1":
+            self.change_state(self.states[8])
+
+        elif tokens[0] == "CLOSING_ACK1":
+            self.change_state(self.states[6])
+
+        elif tokens[0] == "CLOSING_FIN2":
+            pass
+            #todo send ack (fin-wait-2 . add button ack)
+            #time wait
 
     def start_listening(self):
         print "start listening start"
@@ -117,7 +139,10 @@ class TCP:
             return
 
         if 0 < destination_port < 65535 and 0 < source_port < 65535:
-            self.dest_ip = dest_ip
+            if dest_ip == "" or dest_ip is None:
+                self.dest_ip = "localhost"
+            else:
+                self.dest_ip = dest_ip
             self.source_port = source_port
             self.dest_port = destination_port
 
@@ -153,7 +178,19 @@ class TCP:
         self.sock_send.send("CONNEXION_SYN_ACK")
 
     # ESTABLISHED STATE
-    def send_data(self, data):
+    def established_send_data(self, data):
         #SND.NXT incr
         print "SEND :", data
         self.sock_send.send("ESTABLISHED_SEND " + str(data))
+
+    def established_close(self):
+        self.sock_send.send("CLOSING_FIN1")
+        self.change_state(self.states[5])
+
+    # CLOSE-WAIT STATE
+    def close_wait_send_ack(self):
+        self.sock_send.send("CLOSING_ACK1")
+
+    def close_wait_send_fin(self):
+        self.sock_send.send("CLOSING_FIN2")
+        self.change_state(self.states[9])
