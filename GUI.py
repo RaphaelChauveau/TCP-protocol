@@ -1,15 +1,17 @@
 from tkinter import *
+import socket
 
 TITLE_FONT = ("Helvetica", 18, "bold")
 
 
 class App(Tk):
     tcp = None
+    source_ip = socket.gethostbyname(socket.gethostname())
 
     def __init__(self, *args, **kwargs):
         Tk.__init__(self, *args, **kwargs)
 
-        label = Label(self, text="TCP OP")
+        label = Label(self, text="Local IP : "+self.source_ip)
         label.pack()
 
         # the container is where we'll stack a bunch of frames
