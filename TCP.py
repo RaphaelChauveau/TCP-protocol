@@ -89,9 +89,9 @@ class TCP:
 
         elif tokens[0] == "ESTABLISHED_SEND":
             #RCV.NXT incr
-            texto = ""
-            for word in tokens[1:]:
-                texto += word + " "
+            texto = msg[17:]
+            #for word in tokens[1:]:
+            #    texto += word + " "
 
             print "RECEIVED :", tokens[1]
             self.gui.frames["EstablishedFrame"].showmessage(texto)

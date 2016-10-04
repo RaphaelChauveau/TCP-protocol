@@ -168,7 +168,6 @@ class SYNReceivedFrame(Frame):
 
 class EstablishedFrame(Frame):
 
-
     def __init__(self, parent, controller):
         Frame.__init__(self, parent)
         self.controller = controller
@@ -192,19 +191,17 @@ class EstablishedFrame(Frame):
                         command=lambda: controller.tcp.established_close())
         button.pack()
 
-        bar = Scrollbar(self)
-        bar.pack(side=RIGHT, fill=Y)
+        vertbar = Scrollbar(self)
+        vertbar.pack(side=RIGHT, fill=Y)
 
         self.listbox = Listbox(self)
-        self.listbox.pack()
+        self.listbox.pack(fill=X)
 
-        self.listbox.config(yscrollcommand=bar.set)
-        bar.config(command=self.listbox.yview)
+        self.listbox.config(yscrollcommand=vertbar.set)
+        vertbar.config(command=self.listbox.yview)
 
     def showmessage(self, message):
         self.listbox.insert(END, message)
-        #label2 = Label(self, text=message, font=TITLE_FONT)
-        #label2.pack()
 
     def showacknowledge(self):
         self.listbox.insert(END, "# Received ACK")
