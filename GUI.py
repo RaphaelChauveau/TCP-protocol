@@ -189,8 +189,14 @@ class EstablishedFrame(Frame):
                         command=lambda: controller.tcp.established_close())
         button.pack()
 
+        bar = Scrollbar(self)
+        bar.pack(side=RIGHT, fill=Y)
+
         self.listbox = Listbox(self)
         self.listbox.pack()
+
+        self.listbox.config(yscrollcommand=bar.set)
+        bar.config(command=self.listbox.yview)
 
     def showmessage(self, message):
         self.listbox.insert(END, message)
