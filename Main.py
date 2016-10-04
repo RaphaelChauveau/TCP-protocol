@@ -8,7 +8,7 @@ if __name__ == "__main__":
 
 
     def on_closing():
-        if messagebox.askokcancel("Quit", "Are you sure you want to terminate the connection?"):
+        if messagebox.askokcancel("TCP-protocol", "Are you sure you want to terminate the connection?"):
             gui.destroy()
 
 
